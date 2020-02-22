@@ -1,10 +1,21 @@
-import express from 'express'
-import routes from './routes'
+import "dotenv/config";
+import express from "express";
+import routes from "./routes";
 
-const app = express()
+import connection from "./database";
 
-app.use(routes)
+connection
+  .authenticate()
+  .then(() => {
+    console.log("Connection has been established successfully.");
+  })
+  .catch(err => {
+    console.error("Unable to connect to the database:", err);
+  });
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000')
-})
+const app = express();
+
+app.use(express.json());
+app.use(routes);
+
+app.listen(3333);
