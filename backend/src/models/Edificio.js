@@ -9,6 +9,10 @@ class edificio extends Model {
       sequelize
     });
   }
+
+  static associate(models) {
+    this.hasMany(models.sala, { foreignKey: "id_edificio", as: "salas" });
+  }
 }
 
 export default edificio;
