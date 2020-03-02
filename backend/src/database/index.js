@@ -1,17 +1,21 @@
 import Sequelize from "sequelize";
 import config from "../config/database";
-
-//Models
-import Edificio from "../models/Edificio";
-import Sala from "../models/Sala";
-import Pc from "../models/Pc";
+import importModules from "import-modules";
 
 //DB connection
 const connection = new Sequelize(config);
 
+//Models
+const models = importModules("../models");
+
 //Models Call
-Edificio.init(connection);
-Sala.init(connection);
-Pc.init(connection);
+for (const key in models) {
+  models[key].default.init(connection);
+}
+
+//Models Association
+for (const key in models) {
+  models[key].default.associate(connection.models);
+}
 
 export default connection;

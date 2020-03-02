@@ -1,8 +1,8 @@
 export default {
-  database: process.env.DB_DB2,
-  username: process.env.DB_USER2,
-  password: process.env.DB_PASS2,
-  host: process.env.DB_HOST2,
+  database: process.env.DB_DB,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  host: process.env.DB_HOST,
   dialect: "mariadb",
   define: {
     timestamps: false
