@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 
 export default {
   async show(req, res) {
-    const { n_processo, password } = req.query;
+    const { n_processo, password } = req.body;
 
     const user = await User.findOne({
       where: {
@@ -15,6 +15,6 @@ export default {
       return res.json(user);
     }
 
-    return res.status(400), res.json({ error: "Wrong password" });
+    return res.status(205).json({ error: "Wrong Password!" });
   }
 };

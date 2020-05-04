@@ -31,6 +31,6 @@ routes.get("/avarias/:id", AvariaController.show);
 routes.put("/avarias/:id", AvariaController.update);
 
 //Routes Users
-routes.get("/users", UserController.show);
+routes.post("/users", UserController.show);
 
 export default routes;
