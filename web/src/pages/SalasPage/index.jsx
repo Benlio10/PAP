@@ -1,8 +1,12 @@
 import React from "react";
+import { Container } from "@material-ui/core";
 
 const SalasPage = () => {
-  return <div>Salas</div>
-
+  return (
+    <Container>
+      <div>sala</div>
+    </Container>
+  );
 };
 
 export default SalasPage;
