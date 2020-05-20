@@ -1,2 +1,0 @@
-# pap
-Projeto da PAP
