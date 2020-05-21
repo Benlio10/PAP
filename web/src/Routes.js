@@ -19,6 +19,7 @@ const Routes = () => {
           <Route path="/salas" component={SalasPage} />
           <Route path="/pcs" component={PcsPage} />
           <Route path="/avarias" component={AvariasPage} />
+          <Redirect to="/" />
         </Switch>
       </BrowserRouter>
     </>
