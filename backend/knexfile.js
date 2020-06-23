@@ -4,10 +4,10 @@ module.exports = {
   development: {
     client: "mysql",
     connection: {
-      host: "db4free.net",
-      user: "leosilva",
-      password: "Omnitrix1",
-      database: "papsqldatabase"
+      host: "blpm3lx569skj4lwunok-mysql.services.clever-cloud.com",
+      user: "u7nhnrabacwxicx6",
+      password: "LZLXR5TdFklkXHXHIh74",
+      database: "blpm3lx569skj4lwunok"
     },
     useNullAsDefault: true
   },

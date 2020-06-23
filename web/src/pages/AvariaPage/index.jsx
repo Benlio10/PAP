@@ -1,8 +1,26 @@
-import React from "react";
-import { Container, Box, Paper, Grid, Typography } from "@material-ui/core";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import {
+  Container,
+  Box,
+  Paper,
+  Grid,
+  Typography,
+  FormControlLabel,
+  Checkbox
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import {
+  Computer as ComputerIcon,
+  DesktopAccessDisabled as NoPcIcon
+} from "@material-ui/icons";
 
-const useStyles = makeStyles({
+import Header from "../../components/Header";
+import { displayDateFormat } from "../../utils/dateFormat";
+import CustomTable from "../../components/CustomTable";
+import api from "../../services/api";
+
+const useStyles = makeStyles(theme => ({
   container: {
     width: "100%",
     height: "100vh",
@@ -13,65 +31,117 @@ const useStyles = makeStyles({
 
   textTypo: {
     height: 200
+  },
+
+  checkbox: {
+    position: "absolute",
+    right: theme.spacing(2),
+    top: theme.spacing(2),
+    zIndex: 4
   }
-});
+}));
 
 const AvariaPage = () => {
   const classes = useStyles();
+  const location = useLocation();
+  const [avaria] = useState(location.state);
+  const [checked, setChecked] = useState(false);
+  console.log(avaria);
+
+  useEffect(() => () => {
+    const fetchData = async () =>
+      await api.put(`/avaria/${avaria.id}`, { resolvido: checked });
+    fetchData();
+  });
 
   return (
-    <Container className={classes.container} component="main" maxWidth="md">
-      <Box component={Paper} width="100%" p={3}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Typography align="center" paragraph>
-              PC_ID
-            </Typography>
-          </Grid>
-          <Box width="100%" mb={3}>
-            <Grid container item xs={12}>
-              <Grid container item xs={6}>
-                <Box width="100%">
-                  <Grid item xs={12}>
-                    <Typography align="center">Mapa</Typography>
-                  </Grid>
-                </Box>
-              </Grid>
-              <Grid container item xs={6}>
-                <Box width="100%">
-                  <Grid item xs={12}>
-                    <Typography align="center">Observacao</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Box component={Paper} height={200}>
-                      <Typography
-                        classeName={classes.textTypo}
-                        style={{ padding: 14 }}
-                      >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Doloribus nihil odio alias inventore maiores nostrum!
-                        Cupiditate suscipit sunt nulla a, asperiores
-                        reprehenderit tempore impedit accusamus adipisci atque
-                        molestias? Facere, optio!
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Box>
-              </Grid>
+    <>
+      <Header />
+      <Container className={classes.container} component="main" maxWidth="md">
+        <Box component={Paper} width="100%" p={3} position="relative">
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography align="center" paragraph>
+                PC_{avaria.id_pc}
+              </Typography>
+              <FormControlLabel
+                className={classes.checkbox}
+                control={
+                  <Checkbox
+                    checked={checked}
+                    onChange={event => setChecked(event.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="RESOLVIDO"
+              />
             </Grid>
-          </Box>
-        </Grid>
+            <Box width="100%" mb={3}>
+              <Grid container item xs={12}>
+                <Grid container item xs={6}>
+                  <Box width="100%" mr={2}>
+                    <Grid item xs={12}>
+                      <Typography align="center">Mapa</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <CustomTable
+                        xValue={avaria.sala_x}
+                        yValue={avaria.sala_y}
+                        items={[{ x: avaria.pc_x, y: avaria.pc_y }]}
+                        onClick={{ type: "noclick" }}
+                        falseComponent={props => (
+                          <NoPcIcon
+                            {...props}
+                            color="disabled"
+                            fontSize="small"
+                          />
+                        )}
+                      >
+                        {props => (
+                          <ComputerIcon
+                            {...props}
+                            color="primary"
+                            fontSize="small"
+                          />
+                        )}
+                      </CustomTable>
+                    </Grid>
+                  </Box>
+                </Grid>
+                <Grid container item xs={6}>
+                  <Box width="100%" ml={2}>
+                    <Grid item xs={12}>
+                      <Typography align="center">Observacão</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box component={Paper} height={200}>
+                        <Typography
+                          className={classes.textTypo}
+                          style={{ padding: 14 }}
+                        >
+                          {avaria.observacao}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Grid>
 
-        <Grid container item xs={12} justify="space-between">
-          <Grid item xs={6}>
-            <Typography>Datetime</Typography>
+          <Grid container item xs={12} justify="space-between">
+            <Grid item xs={6}>
+              <Typography>{displayDateFormat(avaria.hora)}</Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography align="right">
+                {avaria.utilzador_nome + " " + avaria.utilizador_apelido}
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <Typography align="right">Nome</Typography>
-          </Grid>
-        </Grid>
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </>
   );
 };
 

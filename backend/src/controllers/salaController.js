@@ -8,11 +8,13 @@ module.exports = {
    * @param {response} res
    */
   async index(req, res) {
-    const id_edificio = req.headers.authorization;
+    const id_edificio = req.params.id;
 
     const salas = await connection("salas")
+      .join("edificios", "edificios.id", "salas.id_edificio")
       .where({ id_edificio })
-      .select("*");
+      .select(["salas.*", "edificios.designacao"])
+      .orderBy("num_sala");
 
     return res.json(salas);
   },
@@ -23,7 +25,7 @@ module.exports = {
    * @param {response} res
    */
   async store(req, res) {
-    const { num_sala, x = 0, y = 0, id_edificio } = req.body;
+    const { num_sala, x = null, y = null, id_edificio } = req.body;
 
     let sala = await connection("salas").where({
       num_sala,
@@ -31,7 +33,7 @@ module.exports = {
     });
 
     if (sala.length)
-      return res.status(400).json({ error: "Sala já existente!" });
+      return res.status(400) && res.json({ error: "Sala já existente!" });
 
     sala = await connection("salas").insert({
       num_sala,
@@ -52,8 +54,9 @@ module.exports = {
     const { id } = req.params;
 
     const sala = await connection("salas")
-      .where({ id })
-      .select("*");
+      .join("edificios", "edificios.id", "salas.id_edificio")
+      .where("salas.id", "=", `${id}`)
+      .first(["salas.*", "edificios.designacao"]);
 
     return res.json(sala);
   },

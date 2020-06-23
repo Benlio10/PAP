@@ -11,17 +11,30 @@ module.exports = {
     const { page = 1 } = req.query;
 
     const [count] = await connection("avarias").count();
-    console.log(count["count(*)"]);
 
-    const avaria = await connection("avarias")
+    const avarias = await connection("avarias")
+      .join("utilizadores", "utilizadores.id", "avarias.id_utilizador")
       .join("pcs", "pcs.id", "avarias.id_pc")
-      .limit(6)
-      .offset((page - 1) * 6)
-      .select(["avarias.*", "pcs.x", "pcs.y"]);
+      .join("salas", "salas.id", "pcs.id_sala")
+      .join("edificios", "edificios.id", "salas.id_edificio")
+      // .limit(8)
+      // .offset((page - 1) * 8)
+      .select(
+        "avarias.*",
+        "utilizadores.nome as utilzador_nome",
+        "utilizadores.apelido as utilizador_apelido",
+        "pcs.x as pc_x",
+        "pcs.y as pc_y",
+        "salas.num_sala",
+        "salas.x as sala_x",
+        "salas.y as sala_y",
+        "edificios.designacao"
+      )
+      .where({ resolvido: 0 });
 
     res.header("X-TOTAL-COUNT", count["count(*)"]);
 
-    return res.json(avaria);
+    return res.json(avarias);
   },
 
   /**
@@ -51,7 +64,9 @@ module.exports = {
     const { id } = req.params;
     const { resolvido } = req.body;
 
-    const avaria = await connection("avarias").update({ resolvido });
+    const avaria = await connection("avarias")
+      .where({ id })
+      .update({ resolvido });
 
     return res.json(avaria);
   }

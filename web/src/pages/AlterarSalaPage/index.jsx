@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   Container,
   Box,
@@ -12,55 +13,71 @@ import {
   RadioGroup,
   Divider,
   Button,
-  CircularProgress
+  Typography,
+  IconButton
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { Computer as ComputerIcon } from "@material-ui/icons";
 
 import Header from "../../components/Header";
 import api from "../../services/api";
-import AlertSnackBar from "../../components/AlertSnackBar";
+import CustomTable from "../../components/CustomTable";
 
 const useStyles = makeStyles({
   container: {
     width: "100%",
-    height: "100vh"
+    height: "100vh",
 
-    // display: "flex",
-    // alignItems: "center"
+    display: "flex",
+    alignItems: "center"
   }
 });
 
-const CriarSalaPage = () => {
+const AlterarSalaPage = () => {
   const classes = useStyles();
+  const { id_sala } = useParams();
   const [bloco, setBloco] = useState(null);
   const [numSala, setNumSala] = useState("");
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [alertBar, setAlertBar] = useState({ success: false, error: false });
-  const [errMess, setErrMess] = useState("");
+  const [newPcs, setNewPcs] = useState([]);
 
-  const handleSubmit = event => {
+  useEffect(() => {
+    api.get(`/sala/${id_sala}`).then(response => {
+      setNumSala(response.data.num_sala);
+      setBloco(response.data.id_edificio.toString());
+      setX(response.data.x || 0);
+      setY(response.data.y || 0);
+    });
+
+    api.get(`/pcs/${id_sala}`).then(response => setNewPcs(response.data));
+  }, [id_sala]);
+
+  const handleSubmitSala = event => {
     event.preventDefault();
 
-    setLoading(true);
+    api.put(`/sala/${id_sala}`, {
+      num_sala: numSala,
+      id_edificio: parseInt(bloco),
+      x: x || null,
+      y: y || null
+    });
+  };
 
-    api
-      .post("/salas", {
-        num_sala: numSala,
-        id_edificio: parseInt(bloco),
-        x: x,
-        y: y
-      })
-      .then(() => {
-        setAlertBar({ success: true });
-        setLoading(false);
-      })
-      .catch(data => {
-        setErrMess(data.response.data.error);
-        setAlertBar({ error: true });
-        setLoading(false);
-      });
+  const handleSubmitPcs = async event => {
+    event.preventDefault();
+
+    for (let newPc of newPcs) {
+      await api.post("/pcs", { id_sala, x: newPc.x, y: newPc.y });
+    }
+  };
+
+  const handleTrueClick = ({ x, y }) => {
+    setNewPcs([...newPcs, { x, y }]);
+  };
+
+  const handleFalseClick = ({ x, y }) => {
+    setNewPcs(newPcs.filter(newPc => newPc.x !== x || newPc.y !== y));
   };
 
   return (
@@ -68,7 +85,7 @@ const CriarSalaPage = () => {
       <Header />
       <Container className={classes.container} component="main" maxWidth="md">
         <Box component={Paper} width="100%" p={3}>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmitSala} style={{ marginBottom: 24 }}>
             <Grid container>
               <Grid container item xs={3}>
                 <Grid item xs={12}>
@@ -117,31 +134,50 @@ const CriarSalaPage = () => {
                   color="primary"
                   fullWidth
                   type="submit"
-                  disabled={loading}
+                  style={{ marginTop: 8 }}
                 >
-                  {loading ? <CircularProgress /> : "Criar"}
+                  <Typography variant="button">Alterar</Typography>
                 </Button>
               </Grid>
             </Grid>
           </form>
+
+          <form onSubmit={handleSubmitPcs}>
+            <Grid container>
+              <Grid item xs={12}>
+                <CustomTable
+                  xValue={x}
+                  yValue={y}
+                  items={newPcs}
+                  onClick={{ type: "toggle", handle: handleFalseClick }}
+                  onFalseClick={{ type: "toggle", handle: handleTrueClick }}
+                  falseComponent={props => (
+                    <Button {...props} variant="contained" color="primary">
+                      <Typography>+</Typography>
+                    </Button>
+                  )}
+                >
+                  {props => (
+                    <IconButton {...props}>
+                      <ComputerIcon color="primary" fontSize="large" />
+                    </IconButton>
+                  )}
+                </CustomTable>
+              </Grid>
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                style={{ marginTop: 14 }}
+              >
+                <Typography variant="button">Adicionar os Pcs</Typography>
+              </Button>
+            </Grid>
+          </form>
         </Box>
       </Container>
-
-      <AlertSnackBar
-        open={alertBar.success}
-        setOpen={state => setAlertBar({ success: state })}
-        severity="success"
-        message="Sala criada com sucesso"
-        autoHideDuration={3000}
-      />
-
-      <AlertSnackBar
-        open={alertBar.error}
-        setOpen={state => setAlertBar({ error: state })}
-        severity="error"
-        message={errMess}
-        autoHideDuration={3000}
-      />
     </>
   );
 };
@@ -152,10 +188,6 @@ const RadioGroupComponent = ({ blocoState: { bloco, setBloco } }) => {
   useEffect(() => {
     api.get("/blocos").then(response => setBlocos(response.data));
   }, []);
-
-  useEffect(() => {
-    console.log(bloco);
-  }, [bloco]);
 
   return (
     <FormControl component="fieldset" required>
@@ -179,4 +211,4 @@ const RadioGroupComponent = ({ blocoState: { bloco, setBloco } }) => {
   );
 };
 
-export default CriarSalaPage;
+export default AlterarSalaPage;

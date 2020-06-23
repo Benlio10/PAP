@@ -16,19 +16,19 @@ routes.get("/", (req, res) => {
 routes.get("/blocos", edificioController.index);
 
 // Routes Salas
-routes.get("/salas", salaController.index);
+routes.get("/salas/:id", salaController.index);
 routes.post("/salas", salaController.store);
-routes.get("/salas/:id", salaController.show);
-routes.put("/salas/:id", salaController.update);
+routes.get("/sala/:id", salaController.show);
+routes.put("/sala/:id", salaController.update);
 
 // Routes PCs
-routes.get("/pcs", pcController.index);
+routes.get("/pcs/:id", pcController.index);
 routes.post("/pcs", pcController.store);
 
 // Routes Avarias
 routes.get("/avarias", avariaController.index);
 routes.post("/avarias", avariaController.store);
-routes.put("/avarias/:id", avariaController.update);
+routes.put("/avaria/:id", avariaController.update);
 
 // Routes Session
 routes.post("/session", sessionController.create);
